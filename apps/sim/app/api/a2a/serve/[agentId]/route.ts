@@ -34,7 +34,7 @@ import {
   type PushNotificationSetParams,
   type TaskIdParams,
 } from '@/app/api/a2a/serve/[agentId]/utils'
-import { getBrandConfig } from '@/ee/whitelabeling'
+import { getBrandConfig } from '@/extra/whitelabeling'
 
 const logger = createLogger('A2AServeAPI')
 

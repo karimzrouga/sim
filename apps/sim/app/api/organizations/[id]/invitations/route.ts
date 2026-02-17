@@ -29,7 +29,7 @@ import { hasWorkspaceAdminAccess } from '@/lib/workspaces/permissions/utils'
 import {
   InvitationsNotAllowedError,
   validateInvitationsAllowed,
-} from '@/ee/access-control/utils/permission-check'
+} from '@/sso/access-control/utils/permission-check'
 
 const logger = createLogger('OrganizationInvitations')
 

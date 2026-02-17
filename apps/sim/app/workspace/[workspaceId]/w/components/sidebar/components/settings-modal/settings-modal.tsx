@@ -58,9 +58,9 @@ import {
   WorkflowMcpServers,
 } from '@/app/workspace/[workspaceId]/w/components/sidebar/components/settings-modal/components'
 import { TemplateProfile } from '@/app/workspace/[workspaceId]/w/components/sidebar/components/settings-modal/components/template-profile/template-profile'
-import { AccessControl } from '@/ee/access-control/components/access-control'
-import { SSO } from '@/ee/sso/components/sso-settings'
-import { ssoKeys, useSSOProviders } from '@/ee/sso/hooks/sso'
+import { AccessControl } from '@/sso/access-control/components/access-control'
+import { SSO } from '@/sso/sso/components/sso-settings'
+import { ssoKeys, useSSOProviders } from '@/sso/sso/hooks/sso'
 import { generalSettingsKeys, useGeneralSettings } from '@/hooks/queries/general-settings'
 import { organizationKeys, useOrganizations } from '@/hooks/queries/organization'
 import { subscriptionKeys, useSubscriptionData } from '@/hooks/queries/subscription'

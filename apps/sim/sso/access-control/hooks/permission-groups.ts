@@ -2,7 +2,18 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { PermissionGroupConfig } from '@/lib/permission-groups/types'
-import { fetchJson } from '@/hooks/selectors/helpers'
+
+/**
+ * Static configuration constants
+ */
+const STATIC_MODE_ENABLED = true
+const EMPTY_PERMISSION_GROUPS: PermissionGroup[] = []
+const EMPTY_MEMBERS: PermissionGroupMember[] = []
+const DEFAULT_USER_CONFIG: UserPermissionConfig = {
+  permissionGroupId: null,
+  groupName: null,
+  config: null,
+}
 
 export interface PermissionGroup {
   id: string
@@ -43,69 +54,55 @@ export const permissionGroupKeys = {
     ['permissionGroups', 'userConfig', organizationId ?? 'none'] as const,
 }
 
-interface PermissionGroupsResponse {
-  permissionGroups?: PermissionGroup[]
-}
-
+/**
+ * Static implementation - returns empty array
+ */
 export function usePermissionGroups(organizationId?: string, enabled = true) {
   return useQuery<PermissionGroup[]>({
     queryKey: permissionGroupKeys.list(organizationId),
-    queryFn: async () => {
-      const data = await fetchJson<PermissionGroupsResponse>('/api/permission-groups', {
-        searchParams: { organizationId: organizationId ?? '' },
-      })
-      return data.permissionGroups ?? []
-    },
-    enabled: Boolean(organizationId) && enabled,
+    queryFn: async () => EMPTY_PERMISSION_GROUPS,
+    enabled: STATIC_MODE_ENABLED && Boolean(organizationId) && enabled,
     staleTime: 60 * 1000,
+    initialData: EMPTY_PERMISSION_GROUPS,
   })
 }
 
-interface PermissionGroupDetailResponse {
-  permissionGroup?: PermissionGroup
-}
-
+/**
+ * Static implementation - returns null
+ */
 export function usePermissionGroup(id?: string, enabled = true) {
   return useQuery<PermissionGroup | null>({
     queryKey: permissionGroupKeys.detail(id),
-    queryFn: async () => {
-      const data = await fetchJson<PermissionGroupDetailResponse>(`/api/permission-groups/${id}`)
-      return data.permissionGroup ?? null
-    },
-    enabled: Boolean(id) && enabled,
+    queryFn: async () => null,
+    enabled: STATIC_MODE_ENABLED && Boolean(id) && enabled,
     staleTime: 60 * 1000,
+    initialData: null,
   })
 }
 
-interface MembersResponse {
-  members?: PermissionGroupMember[]
-}
-
+/**
+ * Static implementation - returns empty array
+ */
 export function usePermissionGroupMembers(permissionGroupId?: string) {
   return useQuery<PermissionGroupMember[]>({
     queryKey: permissionGroupKeys.members(permissionGroupId),
-    queryFn: async () => {
-      const data = await fetchJson<MembersResponse>(
-        `/api/permission-groups/${permissionGroupId}/members`
-      )
-      return data.members ?? []
-    },
-    enabled: Boolean(permissionGroupId),
+    queryFn: async () => EMPTY_MEMBERS,
+    enabled: STATIC_MODE_ENABLED && Boolean(permissionGroupId),
     staleTime: 30 * 1000,
+    initialData: EMPTY_MEMBERS,
   })
 }
 
+/**
+ * Static implementation - returns default config
+ */
 export function useUserPermissionConfig(organizationId?: string) {
   return useQuery<UserPermissionConfig>({
     queryKey: permissionGroupKeys.userConfig(organizationId),
-    queryFn: async () => {
-      const data = await fetchJson<UserPermissionConfig>('/api/permission-groups/user', {
-        searchParams: { organizationId: organizationId ?? '' },
-      })
-      return data
-    },
-    enabled: Boolean(organizationId),
+    queryFn: async () => DEFAULT_USER_CONFIG,
+    enabled: STATIC_MODE_ENABLED && Boolean(organizationId),
     staleTime: 60 * 1000,
+    initialData: DEFAULT_USER_CONFIG,
   })
 }
 
@@ -117,21 +114,18 @@ export interface CreatePermissionGroupData {
   autoAddNewMembers?: boolean
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useCreatePermissionGroup() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (data: CreatePermissionGroupData) => {
-      const response = await fetch('/api/permission-groups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to create permission group')
+      if (STATIC_MODE_ENABLED) {
+        return { success: true }
       }
-      return response.json()
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -150,21 +144,18 @@ export interface UpdatePermissionGroupData {
   autoAddNewMembers?: boolean
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useUpdatePermissionGroup() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async ({ id, ...data }: UpdatePermissionGroupData) => {
-      const response = await fetch(`/api/permission-groups/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to update permission group')
+      if (STATIC_MODE_ENABLED) {
+        return { success: true }
       }
-      return response.json()
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -181,19 +172,18 @@ export interface DeletePermissionGroupParams {
   organizationId: string
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useDeletePermissionGroup() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async ({ permissionGroupId }: DeletePermissionGroupParams) => {
-      const response = await fetch(`/api/permission-groups/${permissionGroupId}`, {
-        method: 'DELETE',
-      })
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to delete permission group')
+      if (STATIC_MODE_ENABLED) {
+        return { success: true }
       }
-      return response.json()
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -204,21 +194,18 @@ export function useDeletePermissionGroup() {
   })
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useAddPermissionGroupMember() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (data: { permissionGroupId: string; userId: string }) => {
-      const response = await fetch(`/api/permission-groups/${data.permissionGroupId}/members`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: data.userId }),
-      })
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to add member')
+      if (STATIC_MODE_ENABLED) {
+        return { success: true }
       }
-      return response.json()
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -229,20 +216,18 @@ export function useAddPermissionGroupMember() {
   })
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useRemovePermissionGroupMember() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (data: { permissionGroupId: string; memberId: string }) => {
-      const response = await fetch(
-        `/api/permission-groups/${data.permissionGroupId}/members?memberId=${data.memberId}`,
-        { method: 'DELETE' }
-      )
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to remove member')
+      if (STATIC_MODE_ENABLED) {
+        return { success: true }
       }
-      return response.json()
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -260,21 +245,18 @@ export interface BulkAddMembersData {
   addAllOrgMembers?: boolean
 }
 
+/**
+ * Static implementation - no-op mutation
+ */
 export function useBulkAddPermissionGroupMembers() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async ({ permissionGroupId, ...data }: BulkAddMembersData) => {
-      const response = await fetch(`/api/permission-groups/${permissionGroupId}/members/bulk`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      if (!response.ok) {
-        const result = await response.json()
-        throw new Error(result.error || 'Failed to add members')
+      if (STATIC_MODE_ENABLED) {
+        return { added: 0, moved: 0 }
       }
-      return response.json() as Promise<{ added: number; moved: number }>
+      throw new Error('Not implemented in static mode')
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
